@@ -1,0 +1,10 @@
+{
+    "name": "code33-dapp",
+    "version": "1.0.0",
+    "dependencies": {
+      "@mysten/sui.js": "latest"
+    },
+    "scripts": {
+      "start": "netlify dev"
+    }
+  }

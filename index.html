@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monsters Code33 Vault Unlock</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+      font-size: 2em;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #vaultInfo {
+      margin-top: 20px;
+      font-size: 1.1em;
+      color: #333;
+    }
+    a {
+      color: #0066cc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>Unlock Code33 Vault with Your Happy Monster NFT</h1>
+  <button onclick="connectWallet()">Connect Sui Wallet</button>
+  <div id="vaultInfo" style="display:none;">
+    <p id="nftName"></p>
+    <p>Click below to access the vault:</p>
+    <a id="vaultLink" href="https://bit.ly/code33-vault">Access Vault</a>
+  </div>
+  <script>
+    async function connectWallet() {
+      let provider = null;
+
+      // Log available window properties for debugging
+      console.log('Window properties:', window);
+      console.log('window.sui:', window.sui);
+      console.log('window.phantom:', window.phantom);
+      console.log('window.SuiWallet:', window.SuiWallet);
+
+      // Direct wallet detection
+      if (window.sui && typeof window.sui.connect === 'function') {
+        console.log('Detected Sui Wallet via window.sui');
+        provider = window.sui;
+      } else if (window.phantom?.sui?.isSuiWallet && typeof window.phantom.sui.connect === 'function') {
+        console.log('Detected Phantom Wallet via window.phantom.sui');
+        provider = window.phantom.sui;
+      } else if (window.SuiWallet && typeof window.SuiWallet.connect === 'function') {
+        console.log('Detected Sui Wallet via window.SuiWallet');
+        provider = window.SuiWallet;
+      } else {
+        console.log('No compatible wallet detected.');
+        alert('Please install a Sui-compatible wallet: https://sui.io or https://phantom.app');
+        return;
+      }
+
+      try {
+        console.log('Attempting to connect to wallet:', provider);
+        const result = await provider.connect();
+        console.log('Connection result:', result);
+
+        const accounts = await provider.getAccounts();
+        console.log('Accounts:', accounts);
+        if (!accounts || accounts.length === 0) {
+          alert('No accounts found. Please check your wallet and try again.');
+          return;
+        }
+
+        const userAddress = accounts[0];
+        console.log('User address:', userAddress);
+        const collectionAddress = '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'; // Mock Testnet collection address
+        const response = await fetch('/api/unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userAddress, collectionAddress })
+        });
+        const data = await response.json();
+        if (data.error) {
+          alert('Error: ' + data.error + '. Ensure you own a Monsters Code33 NFT and try again.');
+          return;
+        }
+        if (data.nft) {
+          document.getElementById('vaultInfo').style.display = 'block';
+          document.getElementById('nftName').innerText = 'NFT Owned: ' + data.nft.name;
+          document.getElementById('vaultLink').href = data.vaultUrl;
+        } else {
+          alert('No Monsters Code33 NFT owned in this wallet.');
+        }
+      } catch (e) {
+        alert('Connection failed: ' + e.message + '. Check your wallet and try again.');
+        console.error('Wallet connection error:', e);
+      }
+    }
+  </script>
+</body>
+</html>
